@@ -78,7 +78,7 @@ class TodoWidget extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.delete_outline),
             onPressed: () => onDeleteTap(todo),
-            color: Theme.of(context).primaryColorLight,
+            color: todo.done ? Theme.of(context).primaryColorLight: Theme.of(context).primaryColor,
             tooltip: 'Löschen',
             visualDensity: VisualDensity.compact,
           ),
