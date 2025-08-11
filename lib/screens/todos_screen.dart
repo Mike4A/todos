@@ -129,15 +129,15 @@ class _TodosScreenState extends State<TodosScreen> {
           gradient: LinearGradient(
             colors: [
               Theme.of(context).colorScheme.inversePrimary,
-              Theme.of(context).primaryColor,
+              HSLColor.fromAHSL(0.5, 200, 1, 0.6).toColor(),
               Colors.black,
               Colors.black,
-              Theme.of(context).primaryColor,
+              HSLColor.fromAHSL(0.5, 170, 1, 0.6).toColor(),
               Theme.of(context).colorScheme.inversePrimary,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            stops: [0.0, 0.05, 0.1, 0.9, 0.95, 1],
+            stops: [0.0, 0.025, 0.1, 0.9, 0.975, 1],
           ),
         ),
         child: AnimatedList(
