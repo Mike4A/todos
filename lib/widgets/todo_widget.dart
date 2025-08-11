@@ -37,15 +37,13 @@ class TodoWidget extends StatelessWidget {
         border: Border.all(color: Theme.of(context).primaryColor),
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.inversePrimary,
-            Theme.of(context).primaryColor,
+            Colors.cyanAccent.withAlpha(144),
             Colors.transparent,
-            Theme.of(context).primaryColor,
-            Theme.of(context).colorScheme.inversePrimary,
+            Colors.cyanAccent.withAlpha(144),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: [0.0, 0.2, 0.5, 0.8, 1],
+          stops: [0.0, 0.5, 1],
         ),
         boxShadow: [
           BoxShadow(
