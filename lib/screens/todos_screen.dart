@@ -109,7 +109,7 @@ class _TodosScreenState extends State<TodosScreen> {
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: HSLColor.fromAHSL(0.75, 210, 1, 0.6).toColor(),
         centerTitle: true,
         title: Text(widget.title),
       ),
@@ -128,12 +128,12 @@ class _TodosScreenState extends State<TodosScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Theme.of(context).colorScheme.inversePrimary,
-              HSLColor.fromAHSL(0.5, 200, 1, 0.6).toColor(),
+              HSLColor.fromAHSL(0.75, 210, 1, 0.6).toColor(),
+              HSLColor.fromAHSL(0.5, 210, 1, 0.6).toColor(),
               Colors.black,
               Colors.black,
-              HSLColor.fromAHSL(0.5, 170, 1, 0.6).toColor(),
-              Theme.of(context).colorScheme.inversePrimary,
+              HSLColor.fromAHSL(0.5, 150, 1, 0.6).toColor(),
+              HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -174,7 +174,7 @@ class _TodosScreenState extends State<TodosScreen> {
   Widget _buildAddTodo(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(6),
-      color: Theme.of(context).colorScheme.inversePrimary,
+      color: HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
       child: Row(
         children: [
           Expanded(

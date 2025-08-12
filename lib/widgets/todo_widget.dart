@@ -37,9 +37,9 @@ class TodoWidget extends StatelessWidget {
         border: Border.all(color: Theme.of(context).primaryColor),
         gradient: LinearGradient(
           colors: [
-            HSLColor.fromAHSL(0.5, 200, 1, 0.4).toColor(),
-            Colors.cyanAccent.withAlpha(0),
-            HSLColor.fromAHSL(0.5, 170, 1, 0.4).toColor(),
+            HSLColor.fromAHSL(0.5, 210, 1, 0.4).toColor(),
+            Colors.transparent,
+            HSLColor.fromAHSL(0.5, 150, 1, 0.4).toColor(),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
