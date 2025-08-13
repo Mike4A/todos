@@ -49,7 +49,7 @@ class TodoWidget extends StatelessWidget {
           BoxShadow(
             color: Theme.of(context).primaryColor.withAlpha(64),
             spreadRadius: 3,
-            blurRadius: 3,
+            blurRadius: 6,
           ),
         ],
       ),
@@ -61,15 +61,18 @@ class TodoWidget extends StatelessWidget {
             side: BorderSide(color: Theme.of(context).primaryColorLight, width: 2),
           ),
           Expanded(
-            child: Text(
-              todo.title,
-              style: TextStyle(
-                fontSize: 20,
-                color: todo.done
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).primaryColorLight,
-                decoration: todo.done ? TextDecoration.lineThrough : TextDecoration.none,
-                decorationColor: Theme.of(context).primaryColor,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 3, 6, 3),
+              child: Text(
+                todo.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: todo.done
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).primaryColorLight,
+                  decoration: todo.done ? TextDecoration.lineThrough : TextDecoration.none,
+                  decorationColor: Theme.of(context).primaryColor,
+                ),
               ),
             ),
           ),
