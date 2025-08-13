@@ -65,7 +65,13 @@ class _TodosScreenState extends State<TodosScreen> {
   void _removeTodoWidget(int index, Todo todo) {
     _listKey.currentState!.removeItem(
       index,
-      (context, animation) => SizeTransition(sizeFactor: animation, child: _buildTodoDummy(todo)),
+      (context, animation) => FadeTransition(
+        opacity: animation,
+        child: SizeTransition(
+          sizeFactor: animation,
+          child: ScaleTransition(scale: animation, child: _buildTodoDummy(todo)),
+        ),
+      ),
       duration: const Duration(milliseconds: 500),
     );
   }
@@ -75,12 +81,13 @@ class _TodosScreenState extends State<TodosScreen> {
     _saveTodos();
   }
 
-  void _handleItemDrop(Todo incoming, int targetIndex) {
+  Future<void> _handleItemDrop(Todo incoming, int targetIndex) async {
     final oldIndex = _todos.indexOf(incoming);
     if (oldIndex == targetIndex) return;
     _todos.removeAt(oldIndex);
-    _todos.insert(targetIndex, incoming);
     _removeTodoWidget(oldIndex, incoming);
+    await Future.delayed(Duration(milliseconds: 500));
+    _todos.insert(targetIndex, incoming);
     _listKey.currentState!.insertItem(targetIndex, duration: const Duration(milliseconds: 500));
     _saveTodos();
   }
@@ -154,13 +161,20 @@ class _TodosScreenState extends State<TodosScreen> {
                 _handleItemDrop(details.data, index);
               },
               builder: (context, candidateData, rejectedData) {
-                return SizeTransition(
-                  sizeFactor: animation,
-                  child: TodoWidget(
-                    key: ValueKey(todo),
-                    todo: todo,
-                    onDoneChanged: _handleDoneChanged,
-                    onDeleteTap: _handleDeleteTap,
+                return FadeTransition(
+                  opacity: animation,
+                  child: SizeTransition(
+                    sizeFactor: animation,
+                    child: ScaleTransition(
+                      scale: animation, // 0.0 bis 1.0
+                      alignment: Alignment.center,
+                      child: TodoWidget(
+                        key: ValueKey(todo),
+                        todo: todo,
+                        onDoneChanged: _handleDoneChanged,
+                        onDeleteTap: _handleDeleteTap,
+                      ),
+                    ),
                   ),
                 );
               },
