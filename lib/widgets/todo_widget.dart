@@ -59,6 +59,8 @@ class TodoWidget extends StatelessWidget {
             value: todo.done,
             onChanged: (v) => onDoneChanged(todo, v!),
             side: BorderSide(color: Theme.of(context).primaryColorLight, width: 2),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+
           ),
           Expanded(
             child: Padding(
