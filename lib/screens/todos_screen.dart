@@ -159,58 +159,65 @@ class _TodosScreenState extends State<TodosScreen> {
 
   Widget _buildTodoList(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.01, vertical: MediaQuery.of(context).size.height * 0.05),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              HSLColor.fromAHSL(0.75, 210, 1, 0.6).toColor(),
-              HSLColor.fromAHSL(0.5, 210, 1, 0.6).toColor(),
-              Colors.black,
-              Colors.black,
-              HSLColor.fromAHSL(0.5, 150, 1, 0.6).toColor(),
-              HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 0.025, 0.1, 0.9, 0.975, 1],
-          ),
-        ),
-        child: AnimatedList(
-          controller: _scrollController,
-          key: _listKey,
-          initialItemCount: _todos.length,
-          itemBuilder: (context, index, animation) {
-            final todo = _todos[index];
-            return DragTarget<Todo>(
-              onWillAcceptWithDetails: (details) {
-                return details.data != todo;
-              },
-              onAcceptWithDetails: (details) {
-                _handleItemDrop(details.data, index);
-              },
-              builder: (context, candidateData, rejectedData) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SizeTransition(
-                    sizeFactor: animation,
-                    child: ScaleTransition(
-                      scale: animation, // 0.0 bis 1.0
-                      alignment: Alignment.center,
-                      child: TodoWidget(
-                        key: ValueKey(todo),
-                        todo: todo,
-                        onDoneChanged: _handleDoneChanged,
-                        onDeleteTap: _handleDeleteTap,
-                        onTap: (todo) => _openInput(editing: todo),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: constraints.maxWidth * 0.01,
+              vertical: constraints.maxHeight * 0.05,
+            ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  HSLColor.fromAHSL(0.75, 210, 1, 0.6).toColor(),
+                  HSLColor.fromAHSL(0.5, 210, 1, 0.6).toColor(),
+                  Colors.black,
+                  Colors.black,
+                  HSLColor.fromAHSL(0.5, 150, 1, 0.6).toColor(),
+                  HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.025, 0.1, 0.9, 0.975, 1],
+              ),
+            ),
+            child: AnimatedList(
+              controller: _scrollController,
+              key: _listKey,
+              initialItemCount: _todos.length,
+              itemBuilder: (context, index, animation) {
+                final todo = _todos[index];
+                return DragTarget<Todo>(
+                  onWillAcceptWithDetails: (details) {
+                    return details.data != todo;
+                  },
+                  onAcceptWithDetails: (details) {
+                    _handleItemDrop(details.data, index);
+                  },
+                  builder: (context, candidateData, rejectedData) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SizeTransition(
+                        sizeFactor: animation,
+                        child: ScaleTransition(
+                          scale: animation, // 0.0 bis 1.0
+                          alignment: Alignment.center,
+                          child: TodoWidget(
+                            key: ValueKey(todo),
+                            todo: todo,
+                            onDoneChanged: _handleDoneChanged,
+                            onDeleteTap: _handleDeleteTap,
+                            onTap: (todo) => _openInput(editing: todo),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -227,10 +234,7 @@ class _TodosScreenState extends State<TodosScreen> {
         transitionBuilder: (child, animation) {
           return FadeTransition(
             opacity: animation,
-            child: ScaleTransition(
-              scale: animation,
-              child: child,
-            ),
+            child: ScaleTransition(scale: animation, child: child),
           );
         },
         child: _isInputOpen ? _buildInputArea(context) : _buildAddButton(context),
