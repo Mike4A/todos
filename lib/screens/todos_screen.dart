@@ -216,77 +216,83 @@ class _TodosScreenState extends State<TodosScreen> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor()),
-        child: _isInputOpen
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: _inputController,
-                    autofocus: true,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 3,
-                    textInputAction: TextInputAction.newline,
-                    decoration: InputDecoration(
-                      hintText: 'Titel',
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: _closeInput,
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            side: BorderSide(color: Theme.of(context).primaryColor),
-                          ),
-                          child: const Text('Abbrechen'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _submitInput,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text('Speichern'),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              )
-            : Center(
-                child: FloatingActionButton.extended(
-                  onPressed: () => _openInput(),
-                  label: const Text('Neues Todo', style: TextStyle(color: Colors.black)),
-                  icon: const Icon(Icons.add_rounded, color: Colors.black),
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                ),
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      padding: EdgeInsets.all(8),
+      color: HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 250),
+        switchInCurve: Curves.easeOutBack,
+        switchOutCurve: Curves.easeInBack,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: animation,
+              child: child,
+            ),
+          );
+        },
+        child: _isInputOpen ? _buildInputArea(context) : _buildAddButton(context),
+      ),
+    );
+  }
+
+  Column _buildInputArea(BuildContext context) {
+    return Column(
+      key: ValueKey('input'),
+      children: [
+        TextField(
+          controller: _inputController,
+          autofocus: true,
+          keyboardType: TextInputType.multiline,
+          maxLines: 3,
+          textInputAction: TextInputAction.newline,
+          decoration: InputDecoration(
+            hintText: 'Titel',
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: _closeInput,
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
+              child: Text('Abbrechen'),
+            ),
+            SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: _submitInput,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
               ),
+              child: Text('Speichern'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Center _buildAddButton(BuildContext context) {
+    return Center(
+      key: ValueKey('addButton'),
+      child: ElevatedButton(
+        onPressed: () => _openInput(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+        ),
+        child: Text('+ Neues Todo'),
       ),
     );
   }
