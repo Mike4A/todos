@@ -160,7 +160,7 @@ class _TodosScreenState extends State<TodosScreen> {
   Widget _buildTodoList(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 40),
+        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.01, vertical: MediaQuery.of(context).size.height * 0.05),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
