@@ -247,6 +247,7 @@ class _TodosScreenState extends State<TodosScreen> {
       key: ValueKey('input'),
       children: [
         TextField(
+          enableInteractiveSelection: false,
           controller: _inputController,
           autofocus: true,
           keyboardType: TextInputType.multiline,
