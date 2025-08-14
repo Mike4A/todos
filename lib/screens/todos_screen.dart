@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todos/models/hue_provider.dart';
 import 'package:todos/models/todo.dart';
 import 'package:todos/widgets/todo_widget.dart';
 import 'dart:convert';
@@ -137,10 +139,11 @@ class _TodosScreenState extends State<TodosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final hueA = context.watch<HueProvider>().hueA;
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
-        backgroundColor: HSLColor.fromAHSL(0.75, 210, 1, 0.6).toColor(),
+        backgroundColor: HSLColor.fromAHSL(0.75, hueA, 1, 0.6).toColor(),
         centerTitle: true,
         title: Text(widget.title),
       ),
@@ -158,75 +161,76 @@ class _TodosScreenState extends State<TodosScreen> {
   }
 
   Widget _buildTodoList(BuildContext context) {
-    return Expanded(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: constraints.maxWidth * 0.01,
-              vertical: constraints.maxHeight * 0.05,
+    final hueA = context.watch<HueProvider>().hueA;
+    final hueB = context.watch<HueProvider>().hueB;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: constraints.maxWidth * 0.01,
+            vertical: constraints.maxHeight * 0.05,
+          ),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                HSLColor.fromAHSL(0.75,hueA, 1, 0.6).toColor(),
+                HSLColor.fromAHSL(0.5, hueA, 1, 0.6).toColor(),
+                Colors.black,
+                Colors.black,
+                HSLColor.fromAHSL(0.5, hueB, 1, 0.6).toColor(),
+                HSLColor.fromAHSL(0.75,hueB, 1, 0.6).toColor(),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.0, 0.025, 0.1, 0.9, 0.975, 1],
             ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  HSLColor.fromAHSL(0.75, 210, 1, 0.6).toColor(),
-                  HSLColor.fromAHSL(0.5, 210, 1, 0.6).toColor(),
-                  Colors.black,
-                  Colors.black,
-                  HSLColor.fromAHSL(0.5, 150, 1, 0.6).toColor(),
-                  HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0.0, 0.025, 0.1, 0.9, 0.975, 1],
-              ),
-            ),
-            child: AnimatedList(
-              controller: _scrollController,
-              key: _listKey,
-              initialItemCount: _todos.length,
-              itemBuilder: (context, index, animation) {
-                final todo = _todos[index];
-                return DragTarget<Todo>(
-                  onWillAcceptWithDetails: (details) {
-                    return details.data != todo;
-                  },
-                  onAcceptWithDetails: (details) {
-                    _handleItemDrop(details.data, index);
-                  },
-                  builder: (context, candidateData, rejectedData) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SizeTransition(
-                        sizeFactor: animation,
-                        child: ScaleTransition(
-                          scale: animation, // 0.0 bis 1.0
-                          alignment: Alignment.center,
-                          child: TodoWidget(
-                            key: ValueKey(todo),
-                            todo: todo,
-                            onDoneChanged: _handleDoneChanged,
-                            onDeleteTap: _handleDeleteTap,
-                            onTap: (todo) => _openInput(editing: todo),
-                          ),
+          ),
+          child: AnimatedList(
+            controller: _scrollController,
+            key: _listKey,
+            initialItemCount: _todos.length,
+            itemBuilder: (context, index, animation) {
+              final todo = _todos[index];
+              return DragTarget<Todo>(
+                onWillAcceptWithDetails: (details) {
+                  return details.data != todo;
+                },
+                onAcceptWithDetails: (details) {
+                  _handleItemDrop(details.data, index);
+                },
+                builder: (context, candidateData, rejectedData) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      child: ScaleTransition(
+                        scale: animation, // 0.0 bis 1.0
+                        alignment: Alignment.center,
+                        child: TodoWidget(
+                          key: ValueKey(todo),
+                          todo: todo,
+                          onDoneChanged: _handleDoneChanged,
+                          onDeleteTap: _handleDeleteTap,
+                          onTap: (todo) => _openInput(editing: todo),
                         ),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        },
-      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
   Widget _buildBottomBar(BuildContext context) {
+    final hueB = context.watch<HueProvider>().hueB;
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
       padding: EdgeInsets.all(8),
-      color: HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
+      color: HSLColor.fromAHSL(0.75, hueB, 1, 0.6).toColor(),
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: 250),
         switchInCurve: Curves.easeOutBack,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todos/models/hue_provider.dart';
 import '../models/todo.dart';
 
 class TodoWidget extends StatelessWidget {
@@ -32,16 +34,19 @@ class TodoWidget extends StatelessWidget {
   }
 
   Widget _buildTodoContent(BuildContext context) {
+    final hueA = context.watch<HueProvider>().hueA;
+    final hueB = context.watch<HueProvider>().hueB;
+    final hueCore = context.watch<HueProvider>().hueCore;
     return Container(
       margin: EdgeInsets.all(6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).primaryColor),
+        border: Border.all(color: HSLColor.fromAHSL(1, hueCore, 0.5, 0.5).toColor()),
         gradient: LinearGradient(
           colors: [
-            HSLColor.fromAHSL(0.5, 210, 1, 0.4).toColor(),
+            HSLColor.fromAHSL(0.5, hueA + 30, 1, 0.4).toColor(),
             Colors.transparent,
-            HSLColor.fromAHSL(0.5, 150, 1, 0.4).toColor(),
+            HSLColor.fromAHSL(0.5, hueB, 1, 0.4).toColor(),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -49,7 +54,7 @@ class TodoWidget extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).primaryColor.withAlpha(64),
+            color: HSLColor.fromAHSL(0.25, hueCore, 0.5, 0.5).toColor(),
             spreadRadius: 3,
             blurRadius: 6,
           ),
@@ -58,11 +63,17 @@ class TodoWidget extends StatelessWidget {
       child: Row(
         children: [
           Checkbox(
+            checkColor: HSLColor.fromAHSL(1, hueCore, 1, 0.9).toColor(),
             value: todo.done,
             onChanged: (v) => onDoneChanged(todo, v!),
-            side: BorderSide(color: Theme.of(context).primaryColorLight, width: 2),
+            side: BorderSide(color: HSLColor.fromAHSL(1, hueCore, 0.5, 0.5).toColor(), width: 2),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-
+            fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.selected)) {
+                return HSLColor.fromAHSL(1, hueCore, 0.5, 0.5).toColor();
+              }
+              return Colors.white;
+            }),
           ),
           Expanded(
             child: Padding(
@@ -72,10 +83,10 @@ class TodoWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   color: todo.done
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).primaryColorLight,
+                      ? HSLColor.fromAHSL(1, hueCore, 0.5, 0.5).toColor()
+                      : HSLColor.fromAHSL(1, hueCore, 1, 0.9).toColor(),
                   decoration: todo.done ? TextDecoration.lineThrough : TextDecoration.none,
-                  decorationColor: Theme.of(context).primaryColor,
+                  decorationColor: HSLColor.fromAHSL(1, hueCore, 0.5, 0.5).toColor(),
                 ),
               ),
             ),
@@ -84,7 +95,7 @@ class TodoWidget extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.delete_outline),
               onPressed: () => onDeleteTap(todo),
-              color: Theme.of(context).primaryColorLight,
+              color: HSLColor.fromAHSL(1, hueCore, 1, 0.9).toColor(),
               tooltip: 'Löschen',
               visualDensity: VisualDensity.compact,
             ),
