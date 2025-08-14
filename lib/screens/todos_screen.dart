@@ -16,8 +16,10 @@ class TodosScreen extends StatefulWidget {
 class _TodosScreenState extends State<TodosScreen> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final List<Todo> _todos = [];
-  final TextEditingController _addTodoController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isInputOpen = false;
+  Todo? _editingTodo;
+  final TextEditingController _inputController = TextEditingController();
 
   @override
   void initState() {
@@ -92,94 +94,46 @@ class _TodosScreenState extends State<TodosScreen> {
     _saveTodos();
   }
 
-  void _handleAddTodo() {
-    FocusScope.of(context).unfocus();
-    if (_addTodoController.text.isEmpty) return;
-    final newIndex = _todos.length;
-    _todos.add(Todo(title: _addTodoController.text));
-    _addTodoController.clear();
-    _listKey.currentState!.insertItem(newIndex, duration: const Duration(milliseconds: 500));
-    if (_scrollController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent + 80,
-          duration: Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-        );
-      });
+  void _openInput({Todo? editing}) {
+    setState(() {
+      _editingTodo = editing;
+      _isInputOpen = true;
+      _inputController.text = editing?.title ?? '';
+    });
+  }
+
+  void _closeInput() {
+    setState(() {
+      _isInputOpen = false;
+      _editingTodo = null;
+      _inputController.clear();
+    });
+  }
+
+  void _submitInput() {
+    final text = _inputController.text.trim();
+    if (text.isEmpty) return;
+    if (_editingTodo != null) {
+      final index = _todos.indexOf(_editingTodo!);
+      setState(() => _todos[index].title = text);
+    } else {
+      final newIndex = _todos.length;
+      final item = Todo(title: text);
+      setState(() => _todos.add(item));
+      _listKey.currentState?.insertItem(newIndex, duration: const Duration(milliseconds: 500));
     }
     _saveTodos();
-  }
-
-  void _editTodoBottomSheet(Todo todo) {
-    final controller = TextEditingController(text: todo.title);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: controller,
-                autofocus: true,
-                keyboardType: TextInputType.multiline,
-                maxLines: 7,
-                textInputAction: TextInputAction.newline,
-              ),
-              SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() => todo.title = controller.text);
-                  _saveTodos();
-                  Navigator.pop(context);
-                },
-                child: Text('Speichern'),
-              ),
-              SizedBox(height: 12),
-            ],
-          ),
+    _closeInput();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent + 80,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOut,
         );
-      },
-    );
+      }
+    });
   }
-
-  // void _editTodoTitle(Todo todo) {
-  //   final controller = TextEditingController(text: todo.title);
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: Text('Todo bearbeiten'),
-  //         content: TextField(
-  //           controller: controller,
-  //           autofocus: true,
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.pop(context),
-  //             child: Text('Abbrechen'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               setState(() => todo.title = controller.text);
-  //               _saveTodos();
-  //               Navigator.pop(context);
-  //             },
-  //             child: Text('Speichern'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +144,12 @@ class _TodosScreenState extends State<TodosScreen> {
         centerTitle: true,
         title: Text(widget.title),
       ),
-      body: Column(children: [_buildTodoList(context), _buildAddTodo(context)]),
+      body: Column(
+        children: [
+          Expanded(child: _buildTodoList(context)),
+          _buildBottomBar(context),
+        ],
+      ),
     );
   }
 
@@ -243,7 +202,7 @@ class _TodosScreenState extends State<TodosScreen> {
                         todo: todo,
                         onDoneChanged: _handleDoneChanged,
                         onDeleteTap: _handleDeleteTap,
-                        onTap: _editTodoBottomSheet,
+                        onTap: (todo) => _openInput(editing: todo),
                       ),
                     ),
                   ),
@@ -256,42 +215,78 @@ class _TodosScreenState extends State<TodosScreen> {
     );
   }
 
-  Widget _buildAddTodo(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      color: HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor(),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.all(6),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: 2,
-                textInputAction: TextInputAction.newline,
-                controller: _addTodoController,
-                decoration: InputDecoration(
-                  hintText: 'Neues Todo eingeben',
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                  border: InputBorder.none,
+  Widget _buildBottomBar(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: HSLColor.fromAHSL(0.75, 150, 1, 0.6).toColor()),
+        child: _isInputOpen
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _inputController,
+                    autofocus: true,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: 3,
+                    textInputAction: TextInputAction.newline,
+                    decoration: InputDecoration(
+                      hintText: 'Titel',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _closeInput,
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            side: BorderSide(color: Theme.of(context).primaryColor),
+                          ),
+                          child: const Text('Abbrechen'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _submitInput,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text('Speichern'),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              )
+            : Center(
+                child: FloatingActionButton.extended(
+                  onPressed: () => _openInput(),
+                  label: const Text('Neues Todo', style: TextStyle(color: Colors.black)),
+                  icon: const Icon(Icons.add_rounded, color: Colors.black),
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 ),
               ),
-            ),
-          ),
-          RawMaterialButton(
-            onPressed: _handleAddTodo,
-            shape: CircleBorder(),
-            fillColor: Colors.white,
-            constraints: BoxConstraints.tightFor(width: 40, height: 40),
-            child: Icon(Icons.add_rounded, color: Theme.of(context).primaryColor),
-          ),
-        ],
       ),
     );
   }
