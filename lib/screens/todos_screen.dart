@@ -111,6 +111,40 @@ class _TodosScreenState extends State<TodosScreen> {
     _saveTodos();
   }
 
+  void _editTodoBottomSheet(Todo todo) {
+    final controller = TextEditingController(text: todo.title);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: controller, autofocus: true),
+              SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() => todo.title = controller.text);
+                  _saveTodos();
+                  Navigator.pop(context);
+                },
+                child: Text('Speichern'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

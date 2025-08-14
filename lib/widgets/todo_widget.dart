@@ -5,12 +5,14 @@ class TodoWidget extends StatelessWidget {
   final Todo todo;
   final void Function(Todo, bool) onDoneChanged;
   final void Function(Todo) onDeleteTap;
+  final void Function(Todo) onTap;
 
   const TodoWidget({
     super.key,
     required this.todo,
     required this.onDoneChanged,
     required this.onDeleteTap,
+    required this.onTap,
   });
 
   @override
@@ -25,7 +27,7 @@ class TodoWidget extends StatelessWidget {
         ),
       ),
       childWhenDragging: Opacity(opacity: 0.3, child: _buildTodoContent(context)),
-      child: _buildTodoContent(context),
+      child: GestureDetector(onTap: () => onTap(todo), child: _buildTodoContent(context)),
     );
   }
 
