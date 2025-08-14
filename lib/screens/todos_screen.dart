@@ -113,7 +113,6 @@ class _TodosScreenState extends State<TodosScreen> {
 
   void _editTodoBottomSheet(Todo todo) {
     final controller = TextEditingController(text: todo.title);
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -128,7 +127,13 @@ class _TodosScreenState extends State<TodosScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: controller, autofocus: true),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType: TextInputType.multiline,
+                maxLines: 7,
+                textInputAction: TextInputAction.newline,
+              ),
               SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {
@@ -138,12 +143,43 @@ class _TodosScreenState extends State<TodosScreen> {
                 },
                 child: Text('Speichern'),
               ),
+              SizedBox(height: 12),
             ],
           ),
         );
       },
     );
   }
+
+  // void _editTodoTitle(Todo todo) {
+  //   final controller = TextEditingController(text: todo.title);
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: Text('Todo bearbeiten'),
+  //         content: TextField(
+  //           controller: controller,
+  //           autofocus: true,
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child: Text('Abbrechen'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               setState(() => todo.title = controller.text);
+  //               _saveTodos();
+  //               Navigator.pop(context);
+  //             },
+  //             child: Text('Speichern'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +195,7 @@ class _TodosScreenState extends State<TodosScreen> {
   }
 
   TodoWidget _buildTodoDummy(Todo todo) {
-    return TodoWidget(todo: todo, onDoneChanged: (_, _) {}, onDeleteTap: (_) {});
+    return TodoWidget(todo: todo, onDoneChanged: (_, _) {}, onDeleteTap: (_) {}, onTap: (_) {});
   }
 
   Widget _buildTodoList(BuildContext context) {
@@ -207,6 +243,7 @@ class _TodosScreenState extends State<TodosScreen> {
                         todo: todo,
                         onDoneChanged: _handleDoneChanged,
                         onDeleteTap: _handleDeleteTap,
+                        onTap: _editTodoBottomSheet,
                       ),
                     ),
                   ),
@@ -234,6 +271,9 @@ class _TodosScreenState extends State<TodosScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
+                keyboardType: TextInputType.multiline,
+                maxLines: 2,
+                textInputAction: TextInputAction.newline,
                 controller: _addTodoController,
                 decoration: InputDecoration(
                   hintText: 'Neues Todo eingeben',
