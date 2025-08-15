@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todos/models/hue_provider.dart';
 import 'package:todos/models/todo.dart';
+import 'package:todos/widgets/hue_header.dart';
 import 'package:todos/widgets/todo_widget.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todos/widgets/input_footer.dart';
 
 class TodosScreen extends StatefulWidget {
   const TodosScreen({super.key, required this.title});
@@ -139,16 +141,10 @@ class _TodosScreenState extends State<TodosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hueA = context.watch<HueProvider>().hueA;
     return Scaffold(
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: HSLColor.fromAHSL(0.75, hueA, 1, 0.6).toColor(),
-        centerTitle: true,
-        title: Text(widget.title),
-      ),
       body: Column(
         children: [
+          SafeArea(top: true, child: HueHeader()),
           Expanded(child: _buildTodoList(context)),
           _buildBottomBar(context),
         ],
@@ -173,12 +169,12 @@ class _TodosScreenState extends State<TodosScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                HSLColor.fromAHSL(0.75,hueA, 1, 0.6).toColor(),
+                HSLColor.fromAHSL(0.75, hueA, 1, 0.6).toColor(),
                 HSLColor.fromAHSL(0.5, hueA, 1, 0.6).toColor(),
                 Colors.black,
                 Colors.black,
                 HSLColor.fromAHSL(0.5, hueB, 1, 0.6).toColor(),
-                HSLColor.fromAHSL(0.75,hueB, 1, 0.6).toColor(),
+                HSLColor.fromAHSL(0.75, hueB, 1, 0.6).toColor(),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -226,83 +222,12 @@ class _TodosScreenState extends State<TodosScreen> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    final hueB = context.watch<HueProvider>().hueB;
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      padding: EdgeInsets.all(8),
-      color: HSLColor.fromAHSL(0.75, hueB, 1, 0.6).toColor(),
-      child: AnimatedSwitcher(
-        duration: Duration(milliseconds: 250),
-        switchInCurve: Curves.easeOutBack,
-        switchOutCurve: Curves.easeInBack,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: ScaleTransition(scale: animation, child: child),
-          );
-        },
-        child: _isInputOpen ? _buildInputArea(context) : _buildAddButton(context),
-      ),
-    );
-  }
-
-  Column _buildInputArea(BuildContext context) {
-    return Column(
-      key: ValueKey('input'),
-      children: [
-        TextField(
-          enableInteractiveSelection: false,
-          controller: _inputController,
-          autofocus: true,
-          keyboardType: TextInputType.multiline,
-          maxLines: 3,
-          textInputAction: TextInputAction.newline,
-          decoration: InputDecoration(
-            hintText: 'Titel',
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-        SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: _closeInput,
-              style: TextButton.styleFrom(foregroundColor: Colors.white),
-              child: Text('Abbrechen'),
-            ),
-            SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: _submitInput,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black87,
-              ),
-              child: Text('Speichern'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Center _buildAddButton(BuildContext context) {
-    return Center(
-      key: ValueKey('addButton'),
-      child: ElevatedButton(
-        onPressed: () => _openInput(),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-        ),
-        child: Text('+ Neues Todo'),
-      ),
+    return InputFooter(
+      isInputOpen: _isInputOpen,
+      controller: _inputController,
+      onOpen: () => _openInput(),
+      onClose: _closeInput,
+      onSubmit: (_) => _submitInput(),
     );
   }
 }

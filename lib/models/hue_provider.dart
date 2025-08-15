@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class HueProvider extends ChangeNotifier {
-  double _hueA = 10;
-  double _hueB = 90;
+  double _hueA = 210;
+  double _hueB = 150;
 
   double get hueA => _hueA;
 
