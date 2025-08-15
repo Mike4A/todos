@@ -16,12 +16,12 @@ class HueProvider extends ChangeNotifier {
   }
 
   void setHueA(double newHue) {
-    _hueA = newHue;
+    _hueA = (newHue + 360) % 360;
     notifyListeners();
   }
 
   void setHueB(double newHue) {
-    _hueB = newHue;
+    _hueB = (newHue + 360) % 360;
     notifyListeners();
   }
 }

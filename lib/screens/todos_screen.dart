@@ -141,10 +141,16 @@ class _TodosScreenState extends State<TodosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final hueA = context.watch<HueProvider>().hueA;
     return Scaffold(
       body: Column(
         children: [
-          SafeArea(top: true, child: HueHeader()),
+          AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            height: MediaQuery.of(context).padding.top,
+            color: HSLColor.fromAHSL(0.75, hueA, 1, 0.6).toColor(),
+          ),
+          HueHeader(),
           Expanded(child: _buildTodoList(context)),
           _buildBottomBar(context),
         ],
@@ -161,7 +167,8 @@ class _TodosScreenState extends State<TodosScreen> {
     final hueB = context.watch<HueProvider>().hueB;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Container(
+        return AnimatedContainer(
+          duration: Duration(milliseconds: 300),
           padding: EdgeInsets.symmetric(
             horizontal: constraints.maxWidth * 0.01,
             vertical: constraints.maxHeight * 0.05,

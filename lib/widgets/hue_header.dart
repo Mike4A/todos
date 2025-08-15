@@ -22,7 +22,6 @@ class _HueHeaderState extends State<HueHeader> {
       padding: const EdgeInsets.all(8),
       color: HSLColor.fromAHSL(0.75, hueA, 1, 0.6).toColor(),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
@@ -71,21 +70,41 @@ class _HueHeaderState extends State<HueHeader> {
     );
   }
 
-  Widget _gradientSlider({required double value, required ValueChanged<double> onChanged}) {
-    return SliderTheme(
-      data: SliderTheme.of(
-        context,
-      ).copyWith(trackHeight: 16, overlayShape: SliderComponentShape.noOverlay),
-      child: Slider(
-        min: 0,
-        max: 360,
-        divisions: 360,
-        value: value,
-        onChanged: onChanged,
-        activeColor: Colors.transparent,
-        inactiveColor: Colors.transparent,
-        thumbColor: Colors.white,
-      ),
+  Widget _gradientSlider({
+    required double value,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          height: 16,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                for (int i = 0; i <= 360; i += 30)
+                  HSLColor.fromAHSL(1, i.toDouble(), 1, 0.5).toColor(),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: HSLColor.fromAHSL(1, value, 1, 0.75).toColor())
+          ),
+        ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackShape: null,
+            thumbColor: Colors.white,
+            overlayShape: SliderComponentShape.noOverlay,
+            trackHeight: 0,
+          ),
+          child: Slider(
+            min: 0,
+            max: 359.9,
+            value: value,
+            onChanged: (v) => onChanged(v),
+          ),
+        ),
+      ],
     );
   }
 }
