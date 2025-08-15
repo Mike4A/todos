@@ -45,11 +45,18 @@ class _HueHeaderState extends State<HueHeader> {
   Widget _buildPaletteButton() {
     return Center(
       key: const ValueKey('paletteButton'),
-      child: IconButton(
-        icon: const Icon(Icons.palette, color: Colors.white),
-        onPressed: () {
-          setState(() => _isHuePickerOpen = true);
-        },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Todos', style: TextStyle(fontSize: 20, color: Colors.white)),
+          IconButton(
+            icon: const Icon(Icons.palette, color: Colors.white),
+            onPressed: () {
+              setState(() => _isHuePickerOpen = true);
+            },
+            padding: EdgeInsets.zero,
+          ),
+        ],
       ),
     );
   }
@@ -62,18 +69,22 @@ class _HueHeaderState extends State<HueHeader> {
         const SizedBox(height: 8),
         _gradientSlider(value: hueProvider.hueB, onChanged: (v) => hueProvider.setHueB(v)),
         const SizedBox(height: 8),
-        TextButton(
-          onPressed: () => setState(() => _isHuePickerOpen = false),
-          child: const Text('Schließen', style: TextStyle(color: Colors.white)),
+        ElevatedButton(
+          onPressed: () {
+            setState(() => _isHuePickerOpen = false);
+            hueProvider.save();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+          ),
+          child: const Text('Speichern'),
         ),
       ],
     );
   }
 
-  Widget _gradientSlider({
-    required double value,
-    required ValueChanged<double> onChanged,
-  }) {
+  Widget _gradientSlider({required double value, required ValueChanged<double> onChanged}) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -87,7 +98,7 @@ class _HueHeaderState extends State<HueHeader> {
               ],
             ),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: HSLColor.fromAHSL(1, value, 1, 0.75).toColor())
+            border: Border.all(color: HSLColor.fromAHSL(1, value, 1, 0.75).toColor()),
           ),
         ),
         SliderTheme(
@@ -97,12 +108,7 @@ class _HueHeaderState extends State<HueHeader> {
             overlayShape: SliderComponentShape.noOverlay,
             trackHeight: 0,
           ),
-          child: Slider(
-            min: 0,
-            max: 359.9,
-            value: value,
-            onChanged: (v) => onChanged(v),
-          ),
+          child: Slider(min: 0, max: 359.9, value: value, onChanged: (v) => onChanged(v)),
         ),
       ],
     );

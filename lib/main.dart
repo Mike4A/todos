@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:todos/screens/todos_screen.dart';
 import 'models/hue_provider.dart';
 
-void main() {
-  runApp(ChangeNotifierProvider(create: (_) => HueProvider(), child: const MyApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final hueProvider = await HueProvider.load();
+  runApp(ChangeNotifierProvider(create: (_) => hueProvider, child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

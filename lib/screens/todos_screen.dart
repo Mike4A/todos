@@ -18,8 +18,9 @@ class TodosScreen extends StatefulWidget {
 }
 
 class _TodosScreenState extends State<TodosScreen> {
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final List<Todo> _todos = [];
+  bool _isLoading = true;
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final ScrollController _scrollController = ScrollController();
   bool _isInputOpen = false;
   Todo? _editingTodo;
@@ -36,6 +37,7 @@ class _TodosScreenState extends State<TodosScreen> {
     setState(() {
       _todos.clear();
       _todos.addAll(loadedTodos);
+      _isLoading = false;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (int i = 0; i < _todos.length; i++) {
@@ -151,7 +153,11 @@ class _TodosScreenState extends State<TodosScreen> {
             color: HSLColor.fromAHSL(0.75, hueA, 1, 0.6).toColor(),
           ),
           HueHeader(),
-          Expanded(child: _buildTodoList(context)),
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _buildTodoList(context),
+          ),
           _buildBottomBar(context),
         ],
       ),
@@ -191,8 +197,9 @@ class _TodosScreenState extends State<TodosScreen> {
           child: AnimatedList(
             controller: _scrollController,
             key: _listKey,
-            initialItemCount: _todos.length,
+            initialItemCount: 0,
             itemBuilder: (context, index, animation) {
+              //if (index < 0 || index > _todos.length - 1) return SizedBox.shrink();
               final todo = _todos[index];
               return DragTarget<Todo>(
                 onWillAcceptWithDetails: (details) {
