@@ -46,7 +46,7 @@ class InputFooter extends StatelessWidget {
       key: const ValueKey('input'),
       children: [
         TextField(
-          enableInteractiveSelection: false,
+          enableInteractiveSelection: true,
           controller: controller,
           autofocus: true,
           keyboardType: TextInputType.multiline,
