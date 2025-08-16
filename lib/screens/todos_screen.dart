@@ -63,14 +63,19 @@ class _TodosScreenState extends State<TodosScreen> {
     await prefs.setString('todos', jsonString);
   }
 
-  void _handleDeleteTap(Todo todo) {
-    final index = _todos.indexOf(todo);
-    _todos.remove(todo);
-    _removeTodoWidget(index, todo);
+  void _handleDoneChanged(Todo todo, bool done) {
+    setState(() => todo.done = done);
     _saveTodos();
   }
 
-  void _removeTodoWidget(int index, Todo todo) {
+  void _handleDeleteTap(Todo todo) {
+    _removeTodoWidget(todo);
+    _todos.remove(todo);
+    _saveTodos();
+  }
+
+  void _removeTodoWidget(Todo todo) {
+    final int index = _todos.indexOf(todo);
     _listKey.currentState!.removeItem(
       index,
       (context, animation) => FadeTransition(
@@ -84,15 +89,10 @@ class _TodosScreenState extends State<TodosScreen> {
     );
   }
 
-  void _handleDoneChanged(Todo todo, bool done) {
-    setState(() => todo.done = done);
-    _saveTodos();
-  }
-
-  void _handleItemDrop(Todo incoming, int targetIndex)  {
+  void _handleItemDrop(Todo incoming, int targetIndex) {
     final oldIndex = _todos.indexOf(incoming);
     if (oldIndex == targetIndex) return;
-    _removeTodoWidget(oldIndex, incoming);
+    _removeTodoWidget(incoming);
     _todos.removeAt(oldIndex);
     _todos.insert(targetIndex, incoming);
     _listKey.currentState!.insertItem(targetIndex, duration: const Duration(milliseconds: 300));
@@ -118,26 +118,30 @@ class _TodosScreenState extends State<TodosScreen> {
   void _submitInput() {
     final text = _inputController.text.trim();
     if (text.isEmpty) return;
+    // Bestehendes item updaten
     if (_editingTodo != null) {
-      final index = _todos.indexOf(_editingTodo!);
-      setState(() => _todos[index].title = text);
-    } else {
+      setState(() {
+        _editingTodo?.title = text;
+      });
+    }
+    // Oder neues erstellen
+    else {
       final newIndex = _todos.length;
       final item = Todo(title: text);
       setState(() => _todos.add(item));
       _listKey.currentState?.insertItem(newIndex, duration: const Duration(milliseconds: 500));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent + 80,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut,
+          );
+        }
+      });
     }
     _saveTodos();
     _closeInput();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent + 80,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-        );
-      }
-    });
   }
 
   @override
@@ -155,7 +159,7 @@ class _TodosScreenState extends State<TodosScreen> {
           Expanded(
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
-                : _buildTodoList(context),
+                : _buildTodoListContainer(context),
           ),
           _buildBottomBar(context),
         ],
@@ -163,11 +167,7 @@ class _TodosScreenState extends State<TodosScreen> {
     );
   }
 
-  TodoWidget _buildTodoDummy(Todo todo) {
-    return TodoWidget(todo: todo, onDoneChanged: (_, _) {}, onDeleteTap: (_) {}, onTap: (_) {});
-  }
-
-  Widget _buildTodoList(BuildContext context) {
+  Widget _buildTodoListContainer(BuildContext context) {
     final hueA = context.watch<HueProvider>().hueA;
     final hueB = context.watch<HueProvider>().hueB;
     return LayoutBuilder(
@@ -193,45 +193,53 @@ class _TodosScreenState extends State<TodosScreen> {
               stops: [0.0, 0.025, 0.1, 0.9, 0.975, 1],
             ),
           ),
-          child: AnimatedList(
-            controller: _scrollController,
-            key: _listKey,
-            initialItemCount: 0,
-            itemBuilder: (context, index, animation) {
-              //if (index < 0 || index > _todos.length - 1) return SizedBox.shrink();
-              final todo = _todos[index];
-              return DragTarget<Todo>(
-                onWillAcceptWithDetails: (details) {
-                  return details.data != todo;
-                },
-                onAcceptWithDetails: (details) {
-                  _handleItemDrop(details.data, index);
-                },
-                builder: (context, candidateData, rejectedData) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SizeTransition(
-                      sizeFactor: animation,
-                      child: ScaleTransition(
-                        scale: animation, // 0.0 bis 1.0
-                        alignment: Alignment.center,
-                        child: TodoWidget(
-                          key: ValueKey(todo),
-                          todo: todo,
-                          onDoneChanged: _handleDoneChanged,
-                          onDeleteTap: _handleDeleteTap,
-                          onTap: (todo) => _openInput(editing: todo),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+          child: _buildTodoList(),
         );
       },
     );
+  }
+
+  AnimatedList _buildTodoList() {
+    return AnimatedList(
+      controller: _scrollController,
+      key: _listKey,
+      initialItemCount: 0,
+      itemBuilder: (context, index, animation) {
+        //if (index < 0 || index > _todos.length - 1) return SizedBox.shrink();
+        final todo = _todos[index];
+        return DragTarget<Todo>(
+          onWillAcceptWithDetails: (details) {
+            return details.data != todo;
+          },
+          onAcceptWithDetails: (details) {
+            _handleItemDrop(details.data, index);
+          },
+          builder: (context, candidateData, rejectedData) {
+            return FadeTransition(
+              opacity: animation,
+              child: SizeTransition(
+                sizeFactor: animation,
+                child: ScaleTransition(
+                  scale: animation, // 0.0 bis 1.0
+                  alignment: Alignment.center,
+                  child: TodoWidget(
+                    key: ValueKey(todo),
+                    todo: todo,
+                    onDoneChanged: _handleDoneChanged,
+                    onDeleteTap: _handleDeleteTap,
+                    onTap: (todo) => _openInput(editing: todo),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  TodoWidget _buildTodoDummy(Todo todo) {
+    return TodoWidget(todo: todo, onDoneChanged: (_, _) {}, onDeleteTap: (_) {}, onTap: (_) {});
   }
 
   Widget _buildBottomBar(BuildContext context) {
