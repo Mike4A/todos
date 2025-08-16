@@ -80,7 +80,7 @@ class _TodosScreenState extends State<TodosScreen> {
           child: ScaleTransition(scale: animation, child: _buildTodoDummy(todo)),
         ),
       ),
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -89,14 +89,13 @@ class _TodosScreenState extends State<TodosScreen> {
     _saveTodos();
   }
 
-  Future<void> _handleItemDrop(Todo incoming, int targetIndex) async {
+  void _handleItemDrop(Todo incoming, int targetIndex)  {
     final oldIndex = _todos.indexOf(incoming);
     if (oldIndex == targetIndex) return;
-    _todos.removeAt(oldIndex);
     _removeTodoWidget(oldIndex, incoming);
-    await Future.delayed(Duration(milliseconds: 500));
+    _todos.removeAt(oldIndex);
     _todos.insert(targetIndex, incoming);
-    _listKey.currentState!.insertItem(targetIndex, duration: const Duration(milliseconds: 500));
+    _listKey.currentState!.insertItem(targetIndex, duration: const Duration(milliseconds: 300));
     _saveTodos();
   }
 
